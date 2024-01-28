@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Book Content Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        input {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto p-6">
+        <div class="bg-white rounded-lg shadow px-5 py-6 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                AI E-Book Content Generator
+            </h3>
+            <div class="mt-5 md:mt-0 md:col-span-2">
+                <div class="shadow overflow-hidden sm:rounded-md">
+                    <div class="px-4 py-5 bg-white sm:p-6">
+                        <div class="grid grid-cols-6 gap-6">
+                            <!-- Ebook Title Input -->
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="ebook_title" class="block text-sm font-medium text-gray-700">Ebook Title</label>
+                                <input type="text" id="ebook_title" name="ebook_title"
+                                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <!-- Language Info Input -->
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="language_info" class="block text-sm font-medium text-gray-700">Language</label>
+                                <input type="text" id="language_info" name="language_info"
+                                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <!-- OpenAI Token Input -->
+                            <div class="col-span-6">
+                                <label for="openai_token" class="block text-sm font-medium text-gray-700">Open AI Token</label>
+                                <input type="text" id="openai_token" name="openai_token"
+                                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <!-- Generate Button -->
+                            <div class="col-span-6">
+                                <button type="button" id="generate_btn"
+                                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Generate</button>
+                            </div>
+
+                            <!-- Content Area -->
+                            <div class="col-span-6">
+                                <textarea id="content_area" style="width:100%;min-height:100px;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("generate_btn").addEventListener("click", function () {
+                const ebookTitle = document.getElementById("ebook_title").value;
+                const languageInfo = document.getElementById("language_info").value;
+                const token = document.getElementById("openai_token").value;
+
+                const prompt = `'${ebookTitle}' generate ebook titles. Language = '${languageInfo}'.`.replace(/\s+/g, ' ');
+                generateContent(prompt, token);
+            });
+        });
+
+        function generateContent(prompt, token) {
+            fetch("https://api.openai.com/v1/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-3.5-turbo-instruct',
+                    prompt: prompt,
+                    max_tokens: 2000,
+                    temperature: 0
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const contentData = data?.choices?.[0]?.text;
+                    document.getElementById("content_area").value = contentData;
+                })
+                .catch(error => {
+                    console.error("Error calling OpenAI API:", error);
+                });
+        }
+    </script>
+</body>
+
+</html>
